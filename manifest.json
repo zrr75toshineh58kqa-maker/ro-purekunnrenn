@@ -1,0 +1,15 @@
+{
+  "name": "早期代替提案ロープレ特訓",
+  "short_name": "ロープレ特訓",
+  "start_url": "index.html",
+  "display": "standalone",
+  "background_color": "#f0f2f5",
+  "theme_color": "#d7000f",
+  "icons": [
+    {
+      "src": "icon.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    }
+  ]
+}
