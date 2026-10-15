@@ -1,6 +1,6 @@
 self.addEventListener('install', (e) => {
   e.waitUntil(
-    caches.open('rolenest-v1').then((cache) => {
+    caches.open('rolenest-v2').then((cache) => {
       return cache.addAll([
         'index.html',
         'manifest.json'
