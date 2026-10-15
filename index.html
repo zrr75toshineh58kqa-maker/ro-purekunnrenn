@@ -39,8 +39,8 @@
     <div style="text-align: center;"><span class="badge" id="phase-badge">待機中（スタートを押してください）</span></div>
 
     <div class="chat-box">
-        <div class="customer">お客様（AI）のセリフ：</div>
-        <p id="customer-text">「スタートボタンを押すとロープレが始まります。」</p>
+        <div class="customer">お客様（AI）の状態：</div>
+        <p id="customer-text">「スタートボタンを押してロープレを開始してください。」</p>
     </div>
 
     <div class="user-log" id="result-log">
@@ -131,16 +131,14 @@
 
     startBtn.addEventListener('click', () => {
         currentStep = 1;
-        phaseBadge.textContent = "第1章：来店御礼と世間話";
+        phaseBadge.textContent = "第1章：来店御礼と世間話・アンケート案内";
         checkpointList.innerHTML = `
-            <li>来店御礼、お車の調子伺い</li>
-            <li>QRコードアンケートの協力依頼</li>
+            <li>来店御礼、お車の調子伺い[cite: 1, 2]</li>
+            <li>QRコードアンケートの協力依頼[cite: 1, 2]</li>
         `;
-        const initialText = "こんにちは、ご無沙汰してるね。今日は12ヶ月点検で来たんだけど、待ち時間ちょっとコーヒーでも飲もうと思ってさ。最近そっちはどうだい？";
-        customerText.textContent = `「${initialText}」`;
-        resultLog.textContent = "ロープレ開始。世間話を交えて自然に応対しましょう！";
+        customerText.textContent = "（お店に来店されたお客様役です。あなたが先に挨拶とアンケートのご案内を話してください）";
+        resultLog.textContent = "ロープレ開始。マイクボタンを押して「本日は点検ありがとうございます。アンケートお願いします」と話しかけてください。";
         micBtn.disabled = false;
-        speak(initialText);
     });
 
     resetBtn.addEventListener('click', () => {
@@ -155,32 +153,30 @@
 
     function handleUserSpeech(text) {
         if (!text.trim() || currentStep === 0) return;
-        resultLog.textContent = `あなた: 「${text}」`;
+        resultLog.textContent = `あなた（営業マン）: 「${text}」`;
         processStep(text);
     }
 
     function processStep(text) {
-        // 第1章：来店御礼と世間話
+        // 第1章：営業マンの案内に対してお客様が返答
         if (currentStep === 1) {
-            if (text.includes("点検") || text.includes("アンケート") || text.includes("調子") || text.includes("ありがとう") || text.includes("お元気")) {
+            if (text.includes("点検") || text.includes("アンケート") || text.includes("ありがとう") || text.includes("QR") || text.includes("協力") || text.includes("調子")) {
                 currentStep = 2;
                 phaseBadge.textContent = "第2章：環境変化・録音承諾";
                 checkpointList.innerHTML = `
-                    <li>RAV4の4年間の思い出・通勤レジャー</li>
-                    <li>70歳までの就労予定への共感</li>
+                    <li>RAV4の4年間の思い出・通勤レジャー[cite: 1]</li>
+                    <li>70歳までの就労予定への共感[cite: 1]</li>
                     <li>ミニバン(PHEV/HEV)への興味のヒアリング[cite: 1]</li>
                     <li>シリエルでの録音の承諾[cite: 1, 2]</li>
                 `;
-                const reply = "お陰様で車の調子はすこぶる良いよ！そういえば先週末も妻と二人でちょっと遠出してきたんだよね。アンケートね、あとでスマホでやっとくよ。";
+                const reply = "こんにちは、ご無沙汰してるね！点検ね、分かったよ。アンケートも後でスマートフォンでやっておくね。最近そっちはどうだい？車の調子はバッチリだよ。";
                 customerText.textContent = `「${reply}」`;
                 speak(reply);
                 return;
             } else {
-                // 世間話のバリエーション返答
                 const casualReplies = [
-                    "ははは、おかげさまでこっちは元気にしてるよ。ところで今日の点検はどれくらいかかるかな？",
-                    "そうなんだよ、最近ちょっとドライブになかなか行けてなくてさぁ。車の調子はまあ良いんだけどね。",
-                    "お気遣いありがとうね。そういえばそっちは忙しいかい？"
+                    "こんにちは！あれ、今日は何の用だっけ？あ、点検か。よろしく頼むよ。",
+                    "おっ、こんにちは。待ち時間コーヒーでも飲みながら待たせてもらうね。"
                 ];
                 const reply = casualReplies[Math.floor(Math.random() * casualReplies.length)];
                 customerText.textContent = `「${reply}」`;
@@ -190,7 +186,7 @@
         } 
         // 第2章：環境変化・ヒアリング＆録音承諾
         else if (currentStep === 2) {
-            if (text.includes("ミニバン") || text.includes("レジャー") || text.includes("録音") || text.includes("70歳") || text.includes("4年") || text.includes("遠出") || text.includes("妻")) {
+            if (text.includes("ミニバン") || text.includes("レジャー") || text.includes("録音") || text.includes("70歳") || text.includes("4年") || text.includes("遠出") || text.includes("妻") || text.includes("シリエル")) {
                 currentStep = 3;
                 phaseBadge.textContent = "第3章：新型車・支払・保険";
                 checkpointList.innerHTML = `
@@ -198,7 +194,7 @@
                     <li>使ってバック・TS3カード・トヨタウォレット[cite: 2]</li>
                     <li>残価型割賦(ラクラクプラン)と保険提案(JA満期)[cite: 1, 2]</li>
                 `;
-                const reply = "そうそう、RAV4ももう4年になるんだよねぇ[cite: 1]。仕事もあと70歳までは続けるつもりだから元気に頑張るよ[cite: 1]。妻と二人で乗るなら、最近のちょっと大きめのミニバン（PHEVとかHEV）も気になってるんだよね[cite: 1]。録音？まぁより良い提案をしてくれるならいいよ[cite: 1, 2]。";
+                const reply = "そうそう、RAV4ももう4年になるんだよねぇ[cite: 1]。仕事もあと70歳までは続けるつもりだから元気に頑張るよ[cite: 1]。妻と二人で乗るなら、最近のちょっと大きめのミニバン（PHEVとかHEV）も気になってるんだよね[cite: 1]。録音？まぁより良い提案してくれるならいいよ[cite: 1, 2]。";
                 customerText.textContent = `「${reply}」`;
                 speak(reply);
                 return;
@@ -233,7 +229,7 @@
                     "支払いや保険の話も大事だね。今のラクラクプランのこともあるし、詳しく教えてよ[cite: 1, 2]。"
                 ];
                 const reply = casualReplies[Math.floor(Math.random() * casualReplies.length)];
-                customerText.textContent = `` + reply + ``;
+                customerText.textContent = `「${reply}」`;
                 speak(reply);
                 return;
             }
@@ -248,7 +244,7 @@
                     <li>次回の商談日時の確約（ゴール）[cite: 2]</li>
                 `;
                 const reply = "なるほど、商談メモを見ると下取りも思っていたよりしっかり付くんだね[cite: 1, 2]。メンテナンスパックやコーティングも安心だ。ただ、大きい買い物だから一度家に持ち帰って妻とも相談したいな。";
-                customerText.textContent = `` + reply + ``;
+                customerText.textContent = `「${reply}」`;
                 speak(reply);
                 return;
             } else {
@@ -257,7 +253,7 @@
                     "下取りやコーティング、色々とお得なプランがあるんだねぇ[cite: 2]。"
                 ];
                 const reply = casualReplies[Math.floor(Math.random() * casualReplies.length)];
-                customerText.textContent = `` + reply + ``;
+                customerText.textContent = `「${reply}」`;
                 speak(reply);
                 return;
             }
@@ -269,7 +265,7 @@
                 phaseBadge.textContent = "🎉 ロープレ完了！お疲れ様でした";
                 checkpointList.innerHTML = `<li>全項目クリア！素晴らしい提案でした。</li>`;
                 const reply = "分かったよ。それじゃあ来週の土曜日の午後あたりに、妻と一緒にまたお店に来るから、詳しい見積りを作っておいてね。今日はありがとう！";
-                customerText.textContent = `` + reply + ``;
+                customerText.textContent = `「${reply}」`;
                 speak(reply);
                 return;
             } else {
@@ -278,7 +274,7 @@
                     "そうだね、具体的な見積もりを一度出してもらえるかな？"
                 ];
                 const reply = casualReplies[Math.floor(Math.random() * casualReplies.length)];
-                customerText.textContent = `` + reply + ``;
+                customerText.textContent = `「${reply}」`;
                 speak(reply);
                 return;
             }
@@ -287,7 +283,7 @@
         const defaults = [
             "ほうほう、なるほどねぇ。もう少し詳しく教えてもらえるかい？",
             "そうだね、それについてもう一回分かりやすく教えてくれるかな？",
-            "なるほど、ちなみに他には何かお得なサービスや提案はあるかい？"
+            "なるほど、ちなみに他에는何かお得なサービスや提案はあるかい？"
         ];
         const randomReply = defaults[Math.floor(Math.random() * defaults.length)];
         customerText.textContent = `「${randomReply}」`;
