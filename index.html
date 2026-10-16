@@ -32,14 +32,14 @@
     <!-- チャット・音声再生エリア -->
     <div class="bg-slate-50 border-2 border-dashed border-blue-400 rounded-lg p-4 mb-4 cursor-pointer hover:bg-blue-50 transition relative shadow-sm" id="chat-box-area" title="タップして音声を再生">
         <div class="flex justify-between items-center mb-1">
-            <span class="text-xs font-bold text-slate-700">お客様（AI）の状態：</span>
+            <span class="text-xs font-bold text-slate-700">お客様（AI）の回答：</span>
             <span class="text-xs bg-blue-600 text-white px-2 py-0.5 rounded-full" id="speak-hint">🔊 タップして音声を聴く</span>
         </div>
         <p id="customer-text" class="text-sm font-medium text-slate-900 leading-relaxed">
             「スタートボタンを押してロープレを開始してください。」
         </p>
         <button id="replay-audio-btn" class="mt-2 w-full bg-blue-100 text-blue-700 text-xs font-bold py-1.5 px-3 rounded hover:bg-blue-200 transition">
-            🔊 音声を再再生する（音が聞こえない場合）
+            🔊 音声を再再生する
         </button>
     </div>
 
@@ -64,7 +64,7 @@
     </button>
     
     <div class="text-[10px] text-amber-700 bg-amber-50 p-2 rounded border border-amber-200 mb-4 text-center">
-        ⚠️ <b>スマホで音声が出ない場合：</b>iPhone等のマナーモード（消音スイッチ）がONになっていると音声が鳴らない場合があります。マナーモードを解除するか、上記の「音声を再再生する」ボタンをお試しください。
+        💡 <b>ヒント：</b>音声は自動再生されますが、聞こえにくい場合は上のボックスや「音声を再再生する」ボタンをタップしてください。
     </div>
 
     <div class="border-t border-slate-200 pt-3">
@@ -90,7 +90,7 @@
     let currentStep = 0; 
     let lastSpokenText = "";
 
-    // 音声読み上げ関数（スマホ対応・安定化処理）
+    // 音声読み上げ関数
     function speak(text) {
         if (!('speechSynthesis' in window)) return;
         lastSpokenText = text;
@@ -101,14 +101,12 @@
         utterance.rate = 1.0;
         utterance.pitch = 1.0;
         
-        // 日本語ボイスの優先取得
         const voices = window.speechSynthesis.getVoices();
         const jaVoice = voices.find(v => v.lang === 'ja-JP' || v.lang === 'ja_JP' || v.lang.includes('ja'));
         if (jaVoice) {
             utterance.voice = jaVoice;
         }
 
-        // スマホの制限対策として遅延を入れる
         setTimeout(() => {
             window.speechSynthesis.speak(utterance);
         }, 150);
@@ -116,7 +114,6 @@
         speakHint.style.display = "inline-block";
     }
 
-    // チャットボックスやリプレイボタンをタップしたときに音声を再再生
     function triggerReplay() {
         if (lastSpokenText) {
             speak(lastSpokenText);
@@ -128,7 +125,6 @@
         triggerReplay();
     });
 
-    // ボイスリストのロード待機
     if ('speechSynthesis' in window) {
         window.speechSynthesis.onvoiceschanged = () => {
             window.speechSynthesis.getVoices();
@@ -215,7 +211,7 @@
     function processStep(text) {
         // 第1章：来店御礼と世間話
         if (currentStep === 1) {
-            if (text.includes("点検") || text.includes("ありがとう") || text.includes("調子") || text.includes("いかが") || text.includes("60分") || text.includes("アンケート")) {
+            if (text.includes("点検") || text.includes("ありがとう") || text.includes("調子") || text.includes("60分") || text.includes("アンケート") || text.includes("遠出")) {
                 currentStep = 2;
                 phaseBadge.textContent = "第2章：環境変化のヒアリング＆録音承諾";
                 checkpointList.innerHTML = `
@@ -224,7 +220,7 @@
                     <li>ミニバン(PHEV/HEV)への興味のヒアリング</li>
                     <li>シリエルでの録音承諾（同意画面提示）</li>
                 `;
-                const reply = "こんにちは！点検ね、おかげさまで今のところ車の調子はすこぶる良いよ。アンケートもあとでスマホでやっておくね。";
+                const reply = "こんにちは！点検ね、おかげさまで今のところ車の調子はすこぶる良いよ。先週は家族でちょっと遠くまでドライブしてきたんだ。アンケートもあとでスマホでやっておくね！";
                 customerText.textContent = `「${reply}」`;
                 speak(reply);
                 return;
@@ -237,26 +233,26 @@
         } 
         // 第2章：環境変化のヒアリング＆録音承諾
         else if (currentStep === 2) {
-            if (text.includes("ミニバン") || text.includes("レジャー") || text.includes("録音") || text.includes("70歳") || text.includes("4年") || text.includes("妻") || text.includes("シリエル") || text.includes("PHEV")) {
+            if (text.includes("ミニバン") || text.includes("レジャー") || text.includes("録音") || text.includes("70歳") || text.includes("4年") || text.includes("妻") || text.includes("シリエル") || text.includes("PHEV") || text.includes("HEV")) {
                 currentStep = 3;
-                phaseBadge.textContent = "第3章：新型車・支払・保険の提案";
+                phaseBadge.textContent = "第3章：新型車・支払方法の提案";
                 checkpointList.innerHTML = `
                     <li>【予防安全・燃費】スマカタ画面で進化を説明</li>
                     <li>【使ってバック・TS3・トヨタウォレット】お得なポイント活用</li>
                     <li>【保険提案】クレジット一体型保険・JAからネッツへ一括提案</li>
                 `;
-                const reply = "仕事も70歳までは元気に続けるつもりだから頑張るよ。妻と二人で遠出するなら、最近のちょっと大きめのミニバン（PHEVとかHEV）も気になってるんだよね。録音？より良い提案をしてくれるならいいよ。";
-                customerText.textContent = `「${reply}」`;
+                const reply = "仕事も70歳までは元気に続けるつもりだから頑張るよ。妻と二人で遠出するなら、最近のちょっと大きめのミニバン（PHEVとかHEV）もゆったり乗れそうで気になってるんだよね。録音？より良い提案をしてくれるなら全然いいよ。";
+                customerText.textContent = `` + reply + ``;
                 speak(reply);
                 return;
             } else {
                 const reply = "仕事は相変わらず忙しいけど、70歳までは何とか頑張ろうと思ってさ。妻とドライブするのも好きだから、もっとゆったり乗れる車もいいなとは話してるよ。";
-                customerText.textContent = `「${reply}」`;
+                customerText.textContent = `` + reply + ``;
                 speak(reply);
                 return;
             }
         }
-        // 第3章：新型車の進化・支払方法・保険の提案
+        // 第3章：新型車の進化・支払方法の提案
         else if (currentStep === 3) {
             if (text.includes("安全") || text.includes("燃費") || text.includes("TS3") || text.includes("使ってバック") || text.includes("ウォレット") || text.includes("保険") || text.includes("JA") || text.includes("クレジット") || text.includes("ラクラクプラン")) {
                 currentStep = 4;
@@ -266,45 +262,45 @@
                     <li>【メンテナンス等】パスポート36ET・KeKeeper・通信・LINE登録</li>
                     <li>【TOYOTAアカウント】取得のしっかりサポート</li>
                 `;
-                const reply = "ほぉ、最新のミニバンは予防安全も燃費もそんなに良くなっているんだね。TS3カードの使ってバックでポイントが1.5倍になるのは魅力的だね。今のJAの保険もネッツでまとめられるならラクでいいな！";
-                customerText.textContent = `「${reply}」`;
+                const reply = "ほうほう、最新のミニバンは予防安全も燃費もそんなに良くなっているんだね。TS3カードの使ってバックでポイントが1.5倍になるのは魅力的だね。今のJAの保険もネッツでまとめて一本化できるならラクでいいな！";
+                customerText.textContent = `` + reply + ``;
                 speak(reply);
                 return;
             } else {
                 const reply = "最近の車の安全機能や支払方法について、詳しく画面で見せてくれるかい？保険の切り替えも気になるところだね。";
-                customerText.textContent = `「${reply}」`;
+                customerText.textContent = `` + reply + ``;
                 speak(reply);
                 return;
             }
         } 
         // 第4章：商談メモ・各種お得な提案
         else if (currentStep === 4) {
-            if (text.includes("下取り") || text.includes("メンテナンス") || text.includes("パスポート") || text.includes("アカウント") || text.includes("査定") || text.includes("メモ") || text.includes("キーパー") || text.includes("通信") || text.includes("LINE")) {
+            if (text.includes("下取り") || text.includes("メンテナンス") || text.includes("パスポート") || text.includes("アカウント") || text.includes("査定") || text.includes("メモ") || text.includes("キーパー") || text.includes("通信") || text.includes("LINE") || text.includes("スリーラスター")) {
                 currentStep = 5;
-                phaseBadge.textContent = "第5章：登録納期・次回約束（ゴール）";
+                phaseBadge.textContent = "第5章：登録・納期説明と次回約束";
                 checkpointList.innerHTML = `
                     <li>CEV補助金・登録納期の説明</li>
                     <li>次回商談日時の確約（ゴール）</li>
                 `;
-                const reply = "なるほど、商談メモを見ると下取りも思っていたよりしっかり付くんだね。メンテナンスパックやコーティングも安心だ。ただ、大きい買い物だから一度家に持ち帰って妻とも相談したいな。";
-                customerText.textContent = `「${reply}」`;
+                const reply = "なるほど、商談メモを見ると下取りも思っていたよりしっかり付くんだね。メンテナンスパックやコーティングも安心だ。スマホのLINE登録やアカウントも手伝ってくれて助かるよ。";
+                customerText.textContent = `` + reply + ``;
                 speak(reply);
                 return;
             } else {
                 const reply = "ふむふむ、その商談メモの数字や、下取り、メンテナンスのお得なプランをもう少し詳しく教えてくれるかい？";
-                customerText.textContent = `「${reply}」`;
+                customerText.textContent = `` + reply + ``;
                 speak(reply);
                 return;
             }
         } 
-        // 第5章：登録納期と次回約束
+        // 第5章：登録・納期説明と次回約束
         else if (currentStep === 5) {
-            if (text.includes("日時") || text.includes("来週") || text.includes("何日") || text.includes("お時間") || text.includes("曜日") || text.includes("予約") || text.includes("いつ") || text.includes("日")) {
+            if (text.includes("日時") || text.includes("来週") || text.includes("何日") || text.includes("お時間") || text.instances || text.includes("曜日") || text.includes("予約") || text.includes("いつ") || text.includes("日")) {
                 currentStep = 6;
                 phaseBadge.textContent = "🎉 ロープレ完了！お疲れ様でした";
                 checkpointList.innerHTML = `<li>全項目クリア！素晴らしい提案でした。</li>`;
-                const reply = "分かったよ！それじゃあ来週の土曜日の午後あたりに、妻と一緒にまたお店に来るから、詳しい見積りを作っておいてね。今日はありがとう！";
-                customerText.textContent = `「${reply}」`;
+                const reply = "分かったよ！それじゃあ来週の土曜日の午後2時あたりに、妻と一緒にまたお店に来るから、詳しい見積りを作っておいてね。今日はありがとう！";
+                customerText.textContent = `` + reply + ``;
                 speak(reply);
                 return;
             } else {
@@ -320,7 +316,7 @@
             "そうだね、それについてもう一回分かりやすく教えてくれるかな？"
         ];
         const randomReply = defaults[Math.floor(Math.random() * defaults.length)];
-        customerText.textContent = `「${randomReply}」`;
+        customerText.textContent = `` + randomReply + ``;
         speak(randomReply);
     }
 </script>
