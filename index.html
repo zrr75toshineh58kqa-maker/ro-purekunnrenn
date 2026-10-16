@@ -78,16 +78,13 @@
         navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration failed:', err));
     }
 
-    // 音声合成（確実に自動再生されるよう遅延を調整）
     function speak(text) {
         if ('speechSynthesis' in window) {
             window.speechSynthesis.cancel();
-            setTimeout(() => {
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.lang = 'ja-JP';
-                utterance.rate = 1.0;
-                window.speechSynthesis.speak(utterance);
-            }, 150);
+            const utterance = new SpeechSynthesisUtterance(text);
+            utterance.lang = 'ja-JP';
+            utterance.rate = 1.0;
+            window.speechSynthesis.speak(utterance);
         }
     }
 
@@ -134,13 +131,13 @@
 
     startBtn.addEventListener('click', () => {
         currentStep = 1;
-        phaseBadge.textContent = "第1章：来店御礼と世間話・アンケート案内";
+        phaseBadge.textContent = "第1章-①：ご来店お礼とお車の調子伺い";
         checkpointList.innerHTML = `
-            <li>来店御礼、お車の調子伺い[cite: 1, 2]</li>
-            <li>QRコードアンケートの協力依頼[cite: 1, 2]</li>
+            <li>ご来店お礼（点検のご入庫）</li>
+            <li>お車の調子伺い・世間話</li>
         `;
-        customerText.textContent = "（お店に来店されたお客様役です。あなたが先に挨拶とアンケートのご案内を話してください）";
-        resultLog.textContent = "ロープレ開始。マイクボタンを押して「本日は点検ありがとうございます。アンケートお願いします」と話しかけてください。";
+        customerText.textContent = "（お店に来店されたお客様役です。あなたが先にご来店のお礼と調子伺いを話してください）";
+        resultLog.textContent = "ロープレ開始。「本日は点検ありがとうございます。お車の調子はいかがですか？」と話しかけてください。";
         micBtn.disabled = false;
     });
 
@@ -161,9 +158,38 @@
     }
 
     function processStep(text) {
+        // ステップ1：ご来店お礼・調子伺いに対してお客様が回答
         if (currentStep === 1) {
-            if (text.includes("点検") || text.includes("アンケート") || text.includes("ありがとう") || text.includes("QR") || text.includes("協力") || text.includes("調子")) {
+            if (text.includes("点検") || text.includes("ありがとう") || text.includes("調子") || text.includes("いかが") || text.includes("その後")) {
                 currentStep = 2;
+                phaseBadge.textContent = "第1章-②：QRコードアンケートのご案内";
+                checkpointList.innerHTML = `
+                    <li>スマートフォンの簡単アンケート（QRコード）のご案内</li>
+                `;
+                const replyOptions = [
+                    "こんにちは、ご無沙汰してるね。点検ね、おかげさまで今のところ車の調子はすこぶる良いよ！",
+                    "おっ、こんにちは。待ち時間よろしく頼むよ。車の調子はまぁ問題なく動いてるね。",
+                    "こんにちは。いつもお世話になってます。車の調子はバッチリだよ！"
+                ];
+                const reply = replyOptions[Math.floor(Math.random() * replyOptions.length)];
+                customerText.textContent = `「${reply}」`;
+                speak(reply);
+                return;
+            } else {
+                const hintReplies = [
+                    "よろしく頼むよ。",
+                    "こんにちは。今日も良い天気だねぇ。"
+                ];
+                const reply = hintReplies[Math.floor(Math.random() * hintReplies.length)];
+                customerText.textContent = `「${reply}」`;
+                speak(reply);
+                return;
+            }
+        } 
+        // ステップ2：アンケート案内に対してお客様が回答
+        else if (currentStep === 2) {
+            if (text.includes("アンケート") || text.includes("QR") || text.includes("コード") || text.includes("協力") || text.includes("簡単") || text.includes("スマホ")) {
+                currentStep = 3;
                 phaseBadge.textContent = "第2章：環境変化・録音承諾";
                 checkpointList.innerHTML = `
                     <li>RAV4の4年間の思い出・通勤レジャー[cite: 1]</li>
@@ -171,48 +197,50 @@
                     <li>ミニバン(PHEV/HEV)への興味のヒアリング[cite: 1]</li>
                     <li>シリエルでの録音の承諾[cite: 1, 2]</li>
                 `;
-                const reply = "こんにちは、ご無沙汰してるね！点検ね、分かったよ。アンケートも後でスマートフォンでやっておくね。最近そっちはどうだい？車の調子はバッチリだよ。";
+                const reply = "アンケートね、分かったよあとでスマホでやっておくね。そういえばRAV4ももう4年になるんだねぇ[cite: 1]。";
                 customerText.textContent = `「${reply}」`;
                 speak(reply);
                 return;
             } else {
-                const casualReplies = [
-                    "こんにちは！あれ、今日は何の用だっけ？あ、点検か。よろしく頼むよ。",
-                    "おっ、こんにちは。待ち時間コーヒーでも飲みながら待たせてもらうね。"
+                const hintReplies = [
+                    "待ち時間は何をして過ごそうかなぁ。",
+                    "コーヒーでも飲みながら待たせてもらうよ。"
                 ];
-                const reply = casualReplies[Math.floor(Math.random() * casualReplies.length)];
+                const reply = hintReplies[Math.floor(Math.random() * hintReplies.length)];
                 customerText.textContent = `「${reply}」`;
                 speak(reply);
                 return;
             }
-        } 
-        else if (currentStep === 2) {
+        }
+        // ステップ3：環境変化・ヒアリング＆録音承諾
+        else if (currentStep === 3) {
             if (text.includes("ミニバン") || text.includes("レジャー") || text.includes("録音") || text.includes("70歳") || text.includes("4年") || text.includes("遠出") || text.includes("妻") || text.includes("シリエル")) {
-                currentStep = 3;
+                currentStep = 4;
                 phaseBadge.textContent = "第3章：新型車・支払・保険";
                 checkpointList.innerHTML = `
                     <li>スマカタで新型車の予防安全・燃費説明[cite: 1, 2]</li>
                     <li>使ってバック・TS3カード・トヨタウォレット[cite: 2]</li>
                     <li>残価型割賦(ラクラクプラン)と保険提案(JA満期)[cite: 1, 2]</li>
                 `;
-                const reply = "そうそう、RAV4ももう4年になるんだよねぇ[cite: 1]。仕事もあと70歳までは続けるつもりだから元気に頑張るよ[cite: 1]。妻と二人で乗るなら、最近のちょっと大きめのミニバン（PHEVとかHEV）も気になってるんだよね[cite: 1]。録音？まぁより良い提案してくれるならいいよ[cite: 1, 2]。";
+                const reply = "仕事もあと70歳までは続けるつもりだから元気に頑張るよ[cite: 1]。妻と二人で遠出するなら、最近のちょっと大きめのミニバン（PHEVとかHEV）も気になってるんだよね[cite: 1]。録音？まぁより良い提案をしてくれるならいいよ[cite: 1, 2]。";
                 customerText.textContent = `「${reply}」`;
                 speak(reply);
                 return;
             } else {
-                const casualReplies = [
-                    "仕事はね、まぁ相変わらず忙しいけど、70歳までは何とか頑張ろうと思ってさ[cite: 1]。何かいいことあるかい？",
+                const hintReplies = [
+                    "仕事はね、まぁ相変わらず忙しいけど、70歳までは何とか頑張ろうと思ってさ[cite: 1]。",
                     "妻も私もドライブが好きだから、もっとゆったり乗れる車もいいなとは話してるんだけどね[cite: 1]。"
                 ];
-                const reply = casualReplies[Math.floor(Math.random() * casualReplies.length)];
+                const reply = hintReplies[Math.floor(Math.random() * hintReplies.length)];
                 customerText.textContent = `「${reply}」`;
                 speak(reply);
                 return;
             }
         } 
-        else if (currentStep === 3) {
+        // ステップ4：新型車・支払・保険
+        else if (currentStep === 4) {
             if (text.includes("プラン") || text.includes("保険") || text.includes("TS3") || text.includes("安全") || text.includes("クレジット") || text.includes("車") || text.includes("カード") || text.includes("燃費")) {
-                currentStep = 4;
+                currentStep = 5;
                 phaseBadge.textContent = "第4章：商談メモ・各種提案";
                 checkpointList.innerHTML = `
                     <li>商談メモ（下取り価格・残債・特約）提示[cite: 1, 2]</li>
@@ -224,19 +252,20 @@
                 speak(reply);
                 return;
             } else {
-                const casualReplies = [
+                const hintReplies = [
                     "ほぉ、最近の車の安全機能はすごいんだねぇ。詳しく画面で見せてくれるかい？[cite: 1, 2]",
                     "支払いや保険の話も大事だね。今のラクラクプランのこともあるし、詳しく教えてよ[cite: 1, 2]。"
                 ];
-                const reply = casualReplies[Math.floor(Math.random() * casualReplies.length)];
+                const reply = hintReplies[Math.floor(Math.random() * hintReplies.length)];
                 customerText.textContent = `「${reply}」`;
                 speak(reply);
                 return;
             }
         } 
-        else if (currentStep === 4) {
+        // ステップ5：商談メモ・各種提案
+        else if (currentStep === 5) {
             if (text.includes("下取り") || text.includes("メンテナンス") || text.includes("パスポート") || text.includes("アカウント") || text.includes("査定") || text.includes("メモ") || text.includes("キーパー")) {
-                currentStep = 5;
+                currentStep = 6;
                 phaseBadge.textContent = "第5章：登録納期・次回約束";
                 checkpointList.innerHTML = `
                     <li>CEV補助金・登録納期の説明[cite: 2]</li>
@@ -247,19 +276,20 @@
                 speak(reply);
                 return;
             } else {
-                const casualReplies = [
+                const hintReplies = [
                     "ふむふむ、その商談メモの数字をもう少し詳しく見せてくれるかい？[cite: 1, 2]",
                     "下取りやコーティング、色々とお得なプランがあるんだねぇ[cite: 2]。"
                 ];
-                const reply = casualReplies[Math.floor(Math.random() * casualReplies.length)];
+                const reply = hintReplies[Math.floor(Math.random() * hintReplies.length)];
                 customerText.textContent = `「${reply}」`;
                 speak(reply);
                 return;
             }
         } 
-        else if (currentStep === 5) {
+        // ステップ6：登録納期・次回約束
+        else if (currentStep === 6) {
             if (text.includes("日時") || text.includes("来週") || text.includes("何日") || text.includes("お時間") || text.includes("曜日") || text.includes("予約") || text.includes("いつ")) {
-                currentStep = 6;
+                currentStep = 7;
                 phaseBadge.textContent = "🎉 ロープレ完了！お疲れ様でした";
                 checkpointList.innerHTML = `<li>全項目クリア！素晴らしい提案でした。</li>`;
                 const reply = "分かったよ。それじゃあ来週の土曜日の午後あたりに、妻と一緒にまたお店に来るから、詳しい見積りを作っておいてね。今日はありがとう！";
@@ -267,11 +297,11 @@
                 speak(reply);
                 return;
             } else {
-                const casualReplies = [
+                const hintReplies = [
                     "納期や補助金の話も分かったよ。じゃあ次の休みにまた妻と相談して連絡するよ[cite: 2]。",
                     "そうだね、具体的な見積もりを一度出してもらえるかな？"
                 ];
-                const reply = casualReplies[Math.floor(Math.random() * casualReplies.length)];
+                const reply = hintReplies[Math.floor(Math.random() * hintReplies.length)];
                 customerText.textContent = `「${reply}」`;
                 speak(reply);
                 return;
