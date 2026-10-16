@@ -78,13 +78,16 @@
         navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration failed:', err));
     }
 
+    // 音声合成（確実に自動再生されるよう遅延を調整）
     function speak(text) {
         if ('speechSynthesis' in window) {
             window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'ja-JP';
-            utterance.rate = 1.0;
-            window.speechSynthesis.speak(utterance);
+            setTimeout(() => {
+                const utterance = new SpeechSynthesisUtterance(text);
+                utterance.lang = 'ja-JP';
+                utterance.rate = 1.0;
+                window.speechSynthesis.speak(utterance);
+            }, 150);
         }
     }
 
@@ -158,7 +161,6 @@
     }
 
     function processStep(text) {
-        // 第1章：営業マンの案内に対してお客様が返答
         if (currentStep === 1) {
             if (text.includes("点検") || text.includes("アンケート") || text.includes("ありがとう") || text.includes("QR") || text.includes("協力") || text.includes("調子")) {
                 currentStep = 2;
@@ -184,7 +186,6 @@
                 return;
             }
         } 
-        // 第2章：環境変化・ヒアリング＆録音承諾
         else if (currentStep === 2) {
             if (text.includes("ミニバン") || text.includes("レジャー") || text.includes("録音") || text.includes("70歳") || text.includes("4年") || text.includes("遠出") || text.includes("妻") || text.includes("シリエル")) {
                 currentStep = 3;
@@ -209,7 +210,6 @@
                 return;
             }
         } 
-        // 第3章：新型車・支払・保険
         else if (currentStep === 3) {
             if (text.includes("プラン") || text.includes("保険") || text.includes("TS3") || text.includes("安全") || text.includes("クレジット") || text.includes("車") || text.includes("カード") || text.includes("燃費")) {
                 currentStep = 4;
@@ -234,7 +234,6 @@
                 return;
             }
         } 
-        // 第4章：商談メモ・各種提案
         else if (currentStep === 4) {
             if (text.includes("下取り") || text.includes("メンテナンス") || text.includes("パスポート") || text.includes("アカウント") || text.includes("査定") || text.includes("メモ") || text.includes("キーパー")) {
                 currentStep = 5;
@@ -258,7 +257,6 @@
                 return;
             }
         } 
-        // 第5章：登録納期・次回約束
         else if (currentStep === 5) {
             if (text.includes("日時") || text.includes("来週") || text.includes("何日") || text.includes("お時間") || text.includes("曜日") || text.includes("予約") || text.includes("いつ")) {
                 currentStep = 6;
@@ -283,7 +281,7 @@
         const defaults = [
             "ほうほう、なるほどねぇ。もう少し詳しく教えてもらえるかい？",
             "そうだね、それについてもう一回分かりやすく教えてくれるかな？",
-            "なるほど、ちなみに他에는何かお得なサービスや提案はあるかい？"
+            "なるほど、ちなみに他には何かお得なサービスや提案はあるかい？"
         ];
         const randomReply = defaults[Math.floor(Math.random() * defaults.length)];
         customerText.textContent = `「${randomReply}」`;
