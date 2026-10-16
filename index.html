@@ -3,61 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>早期代替提案ロープレ特訓</title>
-    <link rel="manifest" href="manifest.json">
+    <title>ネッツトヨタ北見 早期代替提案ロープレ特訓</title>
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="ロープレ特訓">
     
+    <!-- Tailwind CSS for modern responsive styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #f0f2f5; margin: 0; padding: 15px; color: #333; }
-        .container { max-width: 500px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
-        h2 { font-size: 1.2rem; color: #d7000f; margin-top: 0; text-align: center; }
-        .badge { background: #eef2ff; color: #3b82f6; padding: 4px 10px; border-radius: 20px; font-size: 0.85rem; display: inline-block; margin-bottom: 10px; }
-        .chat-box { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; min-height: 90px; margin-bottom: 15px; font-size: 0.95rem; line-height: 1.5; }
-        .customer { color: #1e293b; font-weight: bold; margin-bottom: 5px; }
-        .user-log { background: #f1f5f9; padding: 10px; border-radius: 6px; margin-bottom: 15px; font-size: 0.9rem; color: #64748b; }
-        
-        .action-buttons { display: flex; gap: 10px; margin-bottom: 15px; }
-        .action-buttons button { flex: 1; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 0.9rem; border: none; cursor: pointer; }
-        #start-btn { background: #10b981; color: white; }
-        #reset-btn { background: #64748b; color: white; }
-
-        .mic-btn { background: #2563eb; color: white; width: 100%; border: none; border-radius: 30px; padding: 14px; font-size: 1rem; font-weight: bold; cursor: pointer; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(37, 99, 235, 0.2); }
-        .mic-btn.listening { background: #dc2626; animation: pulse 1.5s infinite; }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
-
-        .checklist { font-size: 0.85rem; border-top: 1px solid #e2e8f0; padding-top: 10px; }
-        .checklist ul { padding-left: 20px; margin: 5px 0; color: #475569; }
-        .note { font-size: 0.75rem; color: #dc2626; margin-top: 8px; text-align: center; }
+        .container-box { max-width: 500px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        @keyframes pulse-custom { 0% { opacity: 1; } 50% { opacity: 0.6; } 100% { opacity: 1; } }
+        .listening-anim { animation: pulse-custom 1.5s infinite; }
     </style>
 </head>
-<body>
+<body class="bg-slate-100 min-h-screen py-4 px-2">
 
-<div class="container">
-    <h2>🚗 ネッツトヨタ北見 ロープレ特訓</h2>
-    <div style="text-align: center;"><span class="badge" id="phase-badge">待機中（スタートを押してください）</span></div>
-
-    <div class="chat-box">
-        <div class="customer">お客様（AI）の状態：</div>
-        <p id="customer-text">「スタートボタンを押してロープレを開始してください。」</p>
+<div class="container-box">
+    <h2 class="text-xl font-bold text-red-600 text-center mb-1">🚗 ネッツトヨタ北見</h2>
+    <h3 class="text-sm font-semibold text-slate-600 text-center mb-3">早期代替提案ロープレ特訓（全5章構成）</h3>
+    
+    <div class="text-center mb-3">
+        <span class="bg-indigo-50 text-indigo-700 px-3 py-1 rounded-full text-xs font-semibold inline-block border border-indigo-100" id="phase-badge">
+            待機中（スタートを押してください）
+        </span>
     </div>
 
-    <div class="user-log" id="result-log">
+    <!-- チャット・音声再生エリア -->
+    <div class="bg-slate-50 border-2 border-dashed border-blue-400 rounded-lg p-4 mb-4 cursor-pointer hover:bg-blue-50 transition relative shadow-sm" id="chat-box-area" title="タップして音声を再生">
+        <div class="flex justify-between items-center mb-1">
+            <span class="text-xs font-bold text-slate-700">お客様（AI）の状態：</span>
+            <span class="text-xs bg-blue-600 text-white px-2 py-0.5 rounded-full" id="speak-hint">🔊 タップして音声を聴く</span>
+        </div>
+        <p id="customer-text" class="text-sm font-medium text-slate-900 leading-relaxed">
+            「スタートボタンを押してロープレを開始してください。」
+        </p>
+        <button id="replay-audio-btn" class="mt-2 w-full bg-blue-100 text-blue-700 text-xs font-bold py-1.5 px-3 rounded hover:bg-blue-200 transition">
+            🔊 音声を再再生する（音が聞こえない場合）
+        </button>
+    </div>
+
+    <!-- ユーザー音声認識ログ -->
+    <div class="bg-slate-100 p-3 rounded-lg mb-4 text-xs text-slate-600 border border-slate-200 min-h-[45px]" id="result-log">
         🎙️ 音声認識の状態がここに表示されます...
     </div>
 
-    <div class="action-buttons">
-        <button id="start-btn">▶ ロープレ開始</button>
-        <button id="reset-btn">🔄 最初からリセット</button>
+    <!-- アクションボタン -->
+    <div class="flex gap-2 mb-3">
+        <button id="start-btn" class="flex-1 bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-2 px-4 rounded-lg text-sm shadow">
+            ▶ ロープレ開始
+        </button>
+        <button id="reset-btn" class="flex-1 bg-slate-500 hover:bg-slate-600 text-white font-bold py-2 px-4 rounded-lg text-sm shadow">
+            🔄 リセット
+        </button>
     </div>
 
-    <button id="mic-btn" class="mic-btn" disabled>🎙️ 話して回答する（マイク起動）</button>
-    <div class="note" id="env-note"></div>
+    <!-- マイクボタン -->
+    <button id="mic-btn" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3.5 px-4 rounded-xl text-sm shadow-md mb-2 flex items-center justify-center gap-2" disabled>
+        <span>🎙️ 話して回答する（マイク起動）</span>
+    </button>
+    
+    <div class="text-[10px] text-amber-700 bg-amber-50 p-2 rounded border border-amber-200 mb-4 text-center">
+        ⚠️ <b>スマホで音声が出ない場合：</b>iPhone等のマナーモード（消音スイッチ）がONになっていると音声が鳴らない場合があります。マナーモードを解除するか、上記の「音声を再再生する」ボタンをお試しください。
+    </div>
 
-    <div class="checklist">
-        <strong>📋 この章のチェックポイント：</strong>
-        <ul id="checkpoint-list">
+    <div class="border-t border-slate-200 pt-3">
+        <strong class="text-xs text-slate-700 block mb-1">📋 この章のチェックポイント：</strong>
+        <ul id="checkpoint-list" class="list-disc pl-5 text-xs text-slate-600 space-y-1">
             <li>「ロープレ開始」ボタンを押してスタートしてください。</li>
         </ul>
     </div>
@@ -71,21 +83,56 @@
     const customerText = document.getElementById('customer-text');
     const phaseBadge = document.getElementById('phase-badge');
     const checkpointList = document.getElementById('checkpoint-list');
+    const chatBoxArea = document.getElementById('chat-box-area');
+    const speakHint = document.getElementById('speak-hint');
+    const replayAudioBtn = document.getElementById('replay-audio-btn');
 
     let currentStep = 0; 
+    let lastSpokenText = "";
 
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('sw.js').catch(err => console.log('SW registration failed:', err));
+    // 音声読み上げ関数（スマホ対応・安定化処理）
+    function speak(text) {
+        if (!('speechSynthesis' in window)) return;
+        lastSpokenText = text;
+        window.speechSynthesis.cancel();
+        
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.lang = 'ja-JP';
+        utterance.rate = 1.0;
+        utterance.pitch = 1.0;
+        
+        // 日本語ボイスの優先取得
+        const voices = window.speechSynthesis.getVoices();
+        const jaVoice = voices.find(v => v.lang === 'ja-JP' || v.lang === 'ja_JP' || v.lang.includes('ja'));
+        if (jaVoice) {
+            utterance.voice = jaVoice;
+        }
+
+        // スマホの制限対策として遅延を入れる
+        setTimeout(() => {
+            window.speechSynthesis.speak(utterance);
+        }, 150);
+        
+        speakHint.style.display = "inline-block";
     }
 
-    function speak(text) {
-        if ('speechSynthesis' in window) {
-            window.speechSynthesis.cancel();
-            const utterance = new SpeechSynthesisUtterance(text);
-            utterance.lang = 'ja-JP';
-            utterance.rate = 1.0;
-            window.speechSynthesis.speak(utterance);
+    // チャットボックスやリプレイボタンをタップしたときに音声を再再生
+    function triggerReplay() {
+        if (lastSpokenText) {
+            speak(lastSpokenText);
         }
+    }
+    chatBoxArea.addEventListener('click', triggerReplay);
+    replayAudioBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        triggerReplay();
+    });
+
+    // ボイスリストのロード待機
+    if ('speechSynthesis' in window) {
+        window.speechSynthesis.onvoiceschanged = () => {
+            window.speechSynthesis.getVoices();
+        };
     }
 
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -93,7 +140,7 @@
 
     if (!SpeechRecognition) {
         micBtn.style.display = "none";
-        document.getElementById('env-note').textContent = "※お使いのブラウザは音声認識非対応です。Google Chromeをご利用ください。";
+        resultLog.textContent = "※お使いのブラウザは音声認識非対応です。Google Chrome等をご利用ください。";
     } else {
         recognition = new SpeechRecognition();
         recognition.lang = 'ja-JP';
@@ -102,8 +149,9 @@
         micBtn.addEventListener('click', () => {
             try {
                 recognition.start();
-                micBtn.textContent = "聴き取り中...";
-                micBtn.classList.add('listening');
+                micBtn.innerHTML = "<span>👂 聴き取り中...</span>";
+                micBtn.classList.add('listening-anim', 'bg-red-600');
+                micBtn.classList.remove('bg-blue-600');
                 resultLog.textContent = "🎙️ 話してください...";
             } catch (e) {
                 resultLog.textContent = "マイク起動エラー。もう一度お試しください。";
@@ -112,32 +160,38 @@
 
         recognition.onresult = (event) => {
             const transcript = event.results[0][0].transcript;
-            micBtn.textContent = "🎙️ 話して回答する（マイク起動）";
-            micBtn.classList.remove('listening');
+            resetMicButtonStyle();
             handleUserSpeech(transcript);
         };
 
         recognition.onerror = () => {
             resultLog.textContent = "音声認識エラー。もう一度ボタンを押してください。";
-            micBtn.textContent = "🎙️ 話して回答する（マイク起動）";
-            micBtn.classList.remove('listening');
+            resetMicButtonStyle();
         };
 
         recognition.onend = () => {
-            micBtn.textContent = "🎙️ 話して回答する（マイク起動）";
-            micBtn.classList.remove('listening');
+            resetMicButtonStyle();
         };
+    }
+
+    function resetMicButtonStyle() {
+        micBtn.innerHTML = "<span>🎙️ 話して回答する（マイク起動）</span>";
+        micBtn.classList.remove('listening-anim', 'bg-red-600');
+        micBtn.classList.add('bg-blue-600');
     }
 
     startBtn.addEventListener('click', () => {
         currentStep = 1;
-        phaseBadge.textContent = "第1章-①：ご来店お礼とお車の調子伺い";
+        phaseBadge.textContent = "第1章：来店御礼と世間話";
         checkpointList.innerHTML = `
-            <li>ご来店お礼（点検のご入庫）</li>
-            <li>お車の調子伺い・世間話</li>
+            <li>ご来店お礼（12ヶ月点検）＆お車の調子伺い</li>
+            <li>世間話（遠出のエピソード、お仕事・ご家族のこと）</li>
+            <li>点検時間の案内（約60分）＆スマホ簡単アンケート(QR)のご協力</li>
         `;
-        customerText.textContent = "（お店に来店されたお客様役です。あなたが先にご来店のお礼と調子伺いを話してください）";
+        const initialPrompt = "（ご来店されたお客様役です。あなたが先に来店御礼と調子伺いを話してください）";
+        customerText.textContent = initialPrompt;
         resultLog.textContent = "ロープレ開始。「本日は点検ありがとうございます。お車の調子はいかがですか？」と話しかけてください。";
+        lastSpokenText = "案内を始めてください。";
         micBtn.disabled = false;
     });
 
@@ -148,161 +202,114 @@
         resultLog.textContent = "🎙️ 音声認識の状態がここに表示されます...";
         checkpointList.innerHTML = `<li>「ロープレ開始」ボタンを押してスタートしてください。</li>`;
         micBtn.disabled = true;
+        speakHint.style.display = "none";
         if ('speechSynthesis' in window) window.speechSynthesis.cancel();
     });
 
     function handleUserSpeech(text) {
         if (!text.trim() || currentStep === 0) return;
-        resultLog.textContent = `あなた（営業マン）: 「${text}」`;
+        resultLog.textContent = `あなた: 「${text}」`;
         processStep(text);
     }
 
     function processStep(text) {
-        // ステップ1：ご来店お礼・調子伺いに対してお客様が回答
+        // 第1章：来店御礼と世間話
         if (currentStep === 1) {
-            if (text.includes("点検") || text.includes("ありがとう") || text.includes("調子") || text.includes("いかが") || text.includes("その後")) {
+            if (text.includes("点検") || text.includes("ありがとう") || text.includes("調子") || text.includes("いかが") || text.includes("60分") || text.includes("アンケート")) {
                 currentStep = 2;
-                phaseBadge.textContent = "第1章-②：QRコードアンケートのご案内";
+                phaseBadge.textContent = "第2章：環境変化のヒアリング＆録音承諾";
                 checkpointList.innerHTML = `
-                    <li>スマートフォンの簡単アンケート（QRコード）のご案内</li>
+                    <li>RAV4 4年間の思い出・通勤レジャー</li>
+                    <li>70歳までの就労予定への共感</li>
+                    <li>ミニバン(PHEV/HEV)への興味のヒアリング</li>
+                    <li>シリエルでの録音承諾（同意画面提示）</li>
                 `;
-                const replyOptions = [
-                    "こんにちは、ご無沙汰してるね。点検ね、おかげさまで今のところ車の調子はすこぶる良いよ！",
-                    "おっ、こんにちは。待ち時間よろしく頼むよ。車の調子はまぁ問題なく動いてるね。",
-                    "こんにちは。いつもお世話になってます。車の調子はバッチリだよ！"
-                ];
-                const reply = replyOptions[Math.floor(Math.random() * replyOptions.length)];
+                const reply = "こんにちは！点検ね、おかげさまで今のところ車の調子はすこぶる良いよ。アンケートもあとでスマホでやっておくね。";
                 customerText.textContent = `「${reply}」`;
                 speak(reply);
                 return;
             } else {
-                const hintReplies = [
-                    "よろしく頼むよ。",
-                    "こんにちは。今日も良い天気だねぇ。"
-                ];
-                const reply = hintReplies[Math.floor(Math.random() * hintReplies.length)];
+                const reply = "あれ、今日は何の用だっけ？あ、点検か。よろしく頼むよ。";
                 customerText.textContent = `「${reply}」`;
                 speak(reply);
                 return;
             }
         } 
-        // ステップ2：アンケート案内に対してお客様が回答
+        // 第2章：環境変化のヒアリング＆録音承諾
         else if (currentStep === 2) {
-            if (text.includes("アンケート") || text.includes("QR") || text.includes("コード") || text.includes("協力") || text.includes("簡単") || text.includes("スマホ")) {
+            if (text.includes("ミニバン") || text.includes("レジャー") || text.includes("録音") || text.includes("70歳") || text.includes("4年") || text.includes("妻") || text.includes("シリエル") || text.includes("PHEV")) {
                 currentStep = 3;
-                phaseBadge.textContent = "第2章：環境変化・録音承諾";
+                phaseBadge.textContent = "第3章：新型車・支払・保険の提案";
                 checkpointList.innerHTML = `
-                    <li>RAV4の4年間の思い出・通勤レジャー[cite: 1]</li>
-                    <li>70歳までの就労予定への共感[cite: 1]</li>
-                    <li>ミニバン(PHEV/HEV)への興味のヒアリング[cite: 1]</li>
-                    <li>シリエルでの録音の承諾[cite: 1, 2]</li>
+                    <li>【予防安全・燃費】スマカタ画面で進化を説明</li>
+                    <li>【使ってバック・TS3・トヨタウォレット】お得なポイント活用</li>
+                    <li>【保険提案】クレジット一体型保険・JAからネッツへ一括提案</li>
                 `;
-                const reply = "アンケートね、分かったよあとでスマホでやっておくね。そういえばRAV4ももう4年になるんだねぇ[cite: 1]。";
+                const reply = "仕事も70歳までは元気に続けるつもりだから頑張るよ。妻と二人で遠出するなら、最近のちょっと大きめのミニバン（PHEVとかHEV）も気になってるんだよね。録音？より良い提案をしてくれるならいいよ。";
                 customerText.textContent = `「${reply}」`;
                 speak(reply);
                 return;
             } else {
-                const hintReplies = [
-                    "待ち時間は何をして過ごそうかなぁ。",
-                    "コーヒーでも飲みながら待たせてもらうよ。"
-                ];
-                const reply = hintReplies[Math.floor(Math.random() * hintReplies.length)];
+                const reply = "仕事は相変わらず忙しいけど、70歳までは何とか頑張ろうと思ってさ。妻とドライブするのも好きだから、もっとゆったり乗れる車もいいなとは話してるよ。";
                 customerText.textContent = `「${reply}」`;
                 speak(reply);
                 return;
             }
         }
-        // ステップ3：環境変化・ヒアリング＆録音承諾
+        // 第3章：新型車の進化・支払方法・保険の提案
         else if (currentStep === 3) {
-            if (text.includes("ミニバン") || text.includes("レジャー") || text.includes("録音") || text.includes("70歳") || text.includes("4年") || text.includes("遠出") || text.includes("妻") || text.includes("シリエル")) {
+            if (text.includes("安全") || text.includes("燃費") || text.includes("TS3") || text.includes("使ってバック") || text.includes("ウォレット") || text.includes("保険") || text.includes("JA") || text.includes("クレジット") || text.includes("ラクラクプラン")) {
                 currentStep = 4;
-                phaseBadge.textContent = "第3章：新型車・支払・保険";
+                phaseBadge.textContent = "第4章：商談メモ・各種お得な提案";
                 checkpointList.innerHTML = `
-                    <li>スマカタで新型車の予防安全・燃費説明[cite: 1, 2]</li>
-                    <li>使ってバック・TS3カード・トヨタウォレット[cite: 2]</li>
-                    <li>残価型割賦(ラクラクプラン)と保険提案(JA満期)[cite: 1, 2]</li>
+                    <li>【商談メモ・下取り】下取り価格・残債・特約の説明</li>
+                    <li>【メンテナンス等】パスポート36ET・KeKeeper・通信・LINE登録</li>
+                    <li>【TOYOTAアカウント】取得のしっかりサポート</li>
                 `;
-                const reply = "仕事もあと70歳までは続けるつもりだから元気に頑張るよ[cite: 1]。妻と二人で遠出するなら、最近のちょっと大きめのミニバン（PHEVとかHEV）も気になってるんだよね[cite: 1]。録音？まぁより良い提案をしてくれるならいいよ[cite: 1, 2]。";
+                const reply = "ほぉ、最新のミニバンは予防安全も燃費もそんなに良くなっているんだね。TS3カードの使ってバックでポイントが1.5倍になるのは魅力的だね。今のJAの保険もネッツでまとめられるならラクでいいな！";
                 customerText.textContent = `「${reply}」`;
                 speak(reply);
                 return;
             } else {
-                const hintReplies = [
-                    "仕事はね、まぁ相変わらず忙しいけど、70歳までは何とか頑張ろうと思ってさ[cite: 1]。",
-                    "妻も私もドライブが好きだから、もっとゆったり乗れる車もいいなとは話してるんだけどね[cite: 1]。"
-                ];
-                const reply = hintReplies[Math.floor(Math.random() * hintReplies.length)];
+                const reply = "最近の車の安全機能や支払方法について、詳しく画面で見せてくれるかい？保険の切り替えも気になるところだね。";
                 customerText.textContent = `「${reply}」`;
                 speak(reply);
                 return;
             }
         } 
-        // ステップ4：新型車・支払・保険
+        // 第4章：商談メモ・各種お得な提案
         else if (currentStep === 4) {
-            if (text.includes("プラン") || text.includes("保険") || text.includes("TS3") || text.includes("安全") || text.includes("クレジット") || text.includes("車") || text.includes("カード") || text.includes("燃費")) {
+            if (text.includes("下取り") || text.includes("メンテナンス") || text.includes("パスポート") || text.includes("アカウント") || text.includes("査定") || text.includes("メモ") || text.includes("キーパー") || text.includes("通信") || text.includes("LINE")) {
                 currentStep = 5;
-                phaseBadge.textContent = "第4章：商談メモ・各種提案";
+                phaseBadge.textContent = "第5章：登録納期・次回約束（ゴール）";
                 checkpointList.innerHTML = `
-                    <li>商談メモ（下取り価格・残債・特約）提示[cite: 1, 2]</li>
-                    <li>メンテナンスパスポート36ET・KeKeeper・au等[cite: 2]</li>
-                    <li>TOYOTAアカウント取得サポート[cite: 2]</li>
+                    <li>CEV補助金・登録納期の説明</li>
+                    <li>次回商談日時の確約（ゴール）</li>
                 `;
-                const reply = "へぇ、今の最新のミニバンは安全装備も燃費もそんなに良くなってるんだ[cite: 1]。TS3カードのポイントや使ってバックでお得になるのは魅力的だね[cite: 2]。今のJAの保険もネッツでまとめられるならラクでいいな[cite: 1, 2]。で、今のRAV4の下取りはどれくらいになるの？";
+                const reply = "なるほど、商談メモを見ると下取りも思っていたよりしっかり付くんだね。メンテナンスパックやコーティングも安心だ。ただ、大きい買い物だから一度家に持ち帰って妻とも相談したいな。";
                 customerText.textContent = `「${reply}」`;
                 speak(reply);
                 return;
             } else {
-                const hintReplies = [
-                    "ほぉ、最近の車の安全機能はすごいんだねぇ。詳しく画面で見せてくれるかい？[cite: 1, 2]",
-                    "支払いや保険の話も大事だね。今のラクラクプランのこともあるし、詳しく教えてよ[cite: 1, 2]。"
-                ];
-                const reply = hintReplies[Math.floor(Math.random() * hintReplies.length)];
+                const reply = "ふむふむ、その商談メモの数字や、下取り、メンテナンスのお得なプランをもう少し詳しく教えてくれるかい？";
                 customerText.textContent = `「${reply}」`;
                 speak(reply);
                 return;
             }
         } 
-        // ステップ5：商談メモ・各種提案
+        // 第5章：登録納期と次回約束
         else if (currentStep === 5) {
-            if (text.includes("下取り") || text.includes("メンテナンス") || text.includes("パスポート") || text.includes("アカウント") || text.includes("査定") || text.includes("メモ") || text.includes("キーパー")) {
+            if (text.includes("日時") || text.includes("来週") || text.includes("何日") || text.includes("お時間") || text.includes("曜日") || text.includes("予約") || text.includes("いつ") || text.includes("日")) {
                 currentStep = 6;
-                phaseBadge.textContent = "第5章：登録納期・次回約束";
-                checkpointList.innerHTML = `
-                    <li>CEV補助金・登録納期の説明[cite: 2]</li>
-                    <li>次回の商談日時の確約（ゴール）[cite: 2]</li>
-                `;
-                const reply = "なるほど、商談メモを見ると下取りも思っていたよりしっかり付くんだね[cite: 1, 2]。メンテナンスパックやコーティングも安心だ。ただ、大きい買い物だから一度家に持ち帰って妻とも相談したいな。";
-                customerText.textContent = `「${reply}」`;
-                speak(reply);
-                return;
-            } else {
-                const hintReplies = [
-                    "ふむふむ、その商談メモの数字をもう少し詳しく見せてくれるかい？[cite: 1, 2]",
-                    "下取りやコーティング、色々とお得なプランがあるんだねぇ[cite: 2]。"
-                ];
-                const reply = hintReplies[Math.floor(Math.random() * hintReplies.length)];
-                customerText.textContent = `「${reply}」`;
-                speak(reply);
-                return;
-            }
-        } 
-        // ステップ6：登録納期・次回約束
-        else if (currentStep === 6) {
-            if (text.includes("日時") || text.includes("来週") || text.includes("何日") || text.includes("お時間") || text.includes("曜日") || text.includes("予約") || text.includes("いつ")) {
-                currentStep = 7;
                 phaseBadge.textContent = "🎉 ロープレ完了！お疲れ様でした";
                 checkpointList.innerHTML = `<li>全項目クリア！素晴らしい提案でした。</li>`;
-                const reply = "分かったよ。それじゃあ来週の土曜日の午後あたりに、妻と一緒にまたお店に来るから、詳しい見積りを作っておいてね。今日はありがとう！";
+                const reply = "分かったよ！それじゃあ来週の土曜日の午後あたりに、妻と一緒にまたお店に来るから、詳しい見積りを作っておいてね。今日はありがとう！";
                 customerText.textContent = `「${reply}」`;
                 speak(reply);
                 return;
             } else {
-                const hintReplies = [
-                    "納期や補助金の話も分かったよ。じゃあ次の休みにまた妻と相談して連絡するよ[cite: 2]。",
-                    "そうだね、具体的な見積もりを一度出してもらえるかな？"
-                ];
-                const reply = hintReplies[Math.floor(Math.random() * hintReplies.length)];
-                customerText.textContent = `「${reply}」`;
+                const reply = "納期や補助金の話も分かったよ。じゃあ次の休みにまた妻と相談して、具体的な日時をこちらから連絡するよ。";
+                customerText.textContent = `` + reply + ``;
                 speak(reply);
                 return;
             }
@@ -310,8 +317,7 @@
 
         const defaults = [
             "ほうほう、なるほどねぇ。もう少し詳しく教えてもらえるかい？",
-            "そうだね、それについてもう一回分かりやすく教えてくれるかな？",
-            "なるほど、ちなみに他には何かお得なサービスや提案はあるかい？"
+            "そうだね、それについてもう一回分かりやすく教えてくれるかな？"
         ];
         const randomReply = defaults[Math.floor(Math.random() * defaults.length)];
         customerText.textContent = `「${randomReply}」`;
